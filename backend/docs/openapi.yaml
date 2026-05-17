@@ -1,0 +1,221 @@
+openapi: 3.0.3
+info:
+  title: CAS App API
+  description: |
+    REST API pre CAS (Computer Aided System) aplikáciu s inverzným kyvadlom a guličkou na tyči.
+    Všetky chránené endpointy vyžadujú Bearer token v hlavičke `Authorization`.
+  version: 1.0.0
+
+servers:
+  - url: /api
+    description: Lokálny server
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+
+    LogEntry:
+      type: object
+      properties:
+        id:         { type: integer }
+        created_at: { type: string, format: date-time }
+        type:       { type: string, enum: [eval, pendulum, ball_beam] }
+        command:    { type: string }
+        success:    { type: integer, enum: [0, 1] }
+
+security:
+  - BearerAuth: []
+
+paths:
+  /health:
+    get:
+      summary: Stav servera
+      security: []
+      responses:
+        '200':
+          description: Server beží
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: ok }
+                  time:   { type: string, format: date-time }
+
+  /eval:
+    post:
+      summary: Vykonanie Octave príkazu
+      description: |
+        Odošle príkaz do Octave. Premenné sa ukladajú v rámci session_id,
+        takže je možné pracovať s predchádzajúcimi výsledkami.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [command]
+              properties:
+                command:
+                  type: string
+                  example: "a = 1+1\na+2"
+                session_id:
+                  type: string
+                  example: "user-abc123"
+      responses:
+        '200':
+          description: Výsledok výpočtu
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session_id: { type: string }
+                  command:    { type: string }
+                  stdout:     { type: string }
+                  stderr:     { type: string }
+                  success:    { type: boolean }
+        '400': { description: Chýbajúci príkaz }
+        '401': { description: Neplatný token }
+
+  /simulate/pendulum:
+    post:
+      summary: Simulácia inverzného kyvadla
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                r:             { type: number, default: 0.2, description: "Cieľová pozícia (m)" }
+                init_position: { type: number, default: 0 }
+                init_angle:    { type: number, default: 0 }
+                t_end:         { type: number, default: 10, description: "Čas simulácie (s)" }
+      responses:
+        '200':
+          description: Časové rady simulácie
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  t:        { type: array, items: { type: number }, description: "Časová os" }
+                  position: { type: array, items: { type: number }, description: "Pozícia vozíka (m)" }
+                  angle:    { type: array, items: { type: number }, description: "Uhol kyvadla (rad)" }
+                  x_last:   { type: array, items: { type: number }, description: "Posledný stavový vektor" }
+                  success:  { type: boolean }
+        '401': { description: Neplatný token }
+        '500': { description: Chyba Octave simulácie }
+
+  /simulate/ball-beam:
+    post:
+      summary: Simulácia guličky na tyči
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                r:          { type: number, default: 0.25, description: "Cieľová pozícia guličky (m)" }
+                init_speed: { type: number, default: 0 }
+                init_accel: { type: number, default: 0 }
+                t_end:      { type: number, default: 5 }
+      responses:
+        '200':
+          description: Časové rady simulácie
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  t:             { type: array, items: { type: number } }
+                  ball_position: { type: array, items: { type: number }, description: "Pozícia guličky (m)" }
+                  beam_angle:    { type: array, items: { type: number }, description: "Uhol tyče (rad)" }
+                  x_last:        { type: array, items: { type: number } }
+                  success:       { type: boolean }
+        '401': { description: Neplatný token }
+
+  /logs:
+    get:
+      summary: Zoznam logov
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 50 }
+      responses:
+        '200':
+          description: Stránkovaný zoznam logov
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:  { type: array, items: { $ref: '#/components/schemas/LogEntry' } }
+                  total: { type: integer }
+                  page:  { type: integer }
+                  pages: { type: integer }
+
+  /logs/export:
+    get:
+      summary: Export logov do CSV
+      responses:
+        '200':
+          description: CSV súbor
+          content:
+            text/csv:
+              schema:
+                type: string
+
+  /stats:
+    get:
+      summary: Štatistiky používania animácií
+      responses:
+        '200':
+          description: Celkové a detailné štatistiky
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totals:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        animation_type: { type: string }
+                        total:          { type: integer }
+                  details:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        animation_type: { type: string }
+                        created_at:     { type: string, format: date-time }
+                        city:           { type: string }
+                        country:        { type: string }
+
+  /docs:
+    get:
+      summary: OpenAPI YAML dokumentácia
+      security: []
+      responses:
+        '200':
+          description: OpenAPI špecifikácia
+          content:
+            application/yaml:
+              schema:
+                type: string

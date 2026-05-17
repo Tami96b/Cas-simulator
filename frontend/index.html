@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CAS App – API test</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #0f1117; color: #e2e8f0; padding: 2rem; }
+  h1 { color: #7dd3fc; margin-bottom: 1.5rem; }
+  .card { background: #1e2130; border: 1px solid #2d3348; border-radius: 10px; padding: 1.25rem; margin-bottom: 1.25rem; }
+  label { display: block; font-size: .85rem; color: #94a3b8; margin-bottom: .4rem; }
+  input, textarea, select { width: 100%; background: #111827; border: 1px solid #374151; border-radius: 6px;
+    color: #e2e8f0; padding: .5rem .75rem; font-family: monospace; font-size: .9rem; }
+  textarea { height: 90px; resize: vertical; }
+  button { background: #3b82f6; color: #fff; border: none; border-radius: 6px;
+    padding: .55rem 1.2rem; cursor: pointer; font-size: .9rem; margin-top: .75rem; }
+  button:hover { background: #2563eb; }
+  pre { background: #111827; border-radius: 6px; padding: .75rem; font-size: .8rem;
+    overflow-x: auto; max-height: 260px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 600px) { .row { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<h1>CAS App — API testovací panel</h1>
+
+<div class="card">
+  <label>API Token</label>
+  <input id="token" type="text" value="CHANGE_ME_SECRET_TOKEN_123">
+</div>
+
+<!-- Eval -->
+<div class="card">
+  <label>Octave príkaz (/api/eval)</label>
+  <textarea id="evalCmd">a = 1 + 1
+a + 2</textarea>
+  <button onclick="runEval()">Spustiť</button>
+  <pre id="evalOut">—</pre>
+</div>
+
+<!-- Pendulum -->
+<div class="card">
+  <label>Invertované kyvadlo (/api/simulate/pendulum)</label>
+  <div class="row">
+    <div><label>r (cieľová pozícia)</label><input id="pR" type="number" value="0.2" step="0.05"></div>
+    <div><label>t_end (s)</label><input id="pT" type="number" value="10" step="1"></div>
+  </div>
+  <button onclick="runPendulum()">Simulovať</button>
+  <pre id="pendulumOut">—</pre>
+</div>
+
+<!-- Ball-beam -->
+<div class="card">
+  <label>Gulička na tyči (/api/simulate/ball-beam)</label>
+  <div class="row">
+    <div><label>r (cieľová pozícia)</label><input id="bR" type="number" value="0.25" step="0.05"></div>
+    <div><label>t_end (s)</label><input id="bT" type="number" value="5" step="1"></div>
+  </div>
+  <button onclick="runBallBeam()">Simulovať</button>
+  <pre id="ballBeamOut">—</pre>
+</div>
+
+<!-- Logs -->
+<div class="card">
+  <button onclick="getLogs()">Zobraziť logy</button>
+  <button onclick="exportLogs()">Exportovať CSV</button>
+  <pre id="logsOut">—</pre>
+</div>
+
+<!-- Stats -->
+<div class="card">
+  <button onclick="getStats()">Zobraziť štatistiky</button>
+  <pre id="statsOut">—</pre>
+</div>
+
+<script>
+const API = '/api';
+const token = () => document.getElementById('token').value.trim();
+
+async function apiFetch(path, options = {}) {
+  const res = await fetch(API + path, {
+    ...options,
+    headers: { 'Authorization': 'Bearer ' + token(), 'Content-Type': 'application/json', ...(options.headers || {}) },
+  });
+  if (res.headers.get('content-type')?.includes('json')) return res.json();
+  return res.text();
+}
+
+async function runEval() {
+  const out = document.getElementById('evalOut');
+  out.textContent = 'Načítavam…';
+  const cmd = document.getElementById('evalCmd').value;
+  const data = await apiFetch('/eval', { method: 'POST', body: JSON.stringify({ command: cmd, session_id: 'test' }) });
+  out.textContent = JSON.stringify(data, null, 2);
+}
+
+async function runPendulum() {
+  const out = document.getElementById('pendulumOut');
+  out.textContent = 'Simulujem…';
+  const data = await apiFetch('/simulate/pendulum', {
+    method: 'POST',
+    body: JSON.stringify({ r: +document.getElementById('pR').value, t_end: +document.getElementById('pT').value })
+  });
+  if (data.t) {
+    out.textContent = `OK – ${data.t.length} časových krokov\nPozícia[0]: ${data.position[0]?.toFixed(4)}\nPozícia[-1]: ${data.position.at(-1)?.toFixed(4)}`;
+  } else {
+    out.textContent = JSON.stringify(data, null, 2);
+  }
+}
+
+async function runBallBeam() {
+  const out = document.getElementById('ballBeamOut');
+  out.textContent = 'Simulujem…';
+  const data = await apiFetch('/simulate/ball-beam', {
+    method: 'POST',
+    body: JSON.stringify({ r: +document.getElementById('bR').value, t_end: +document.getElementById('bT').value })
+  });
+  if (data.t) {
+    out.textContent = `OK – ${data.t.length} časových krokov\nPozícia[0]: ${data.ball_position[0]?.toFixed(4)}\nPozícia[-1]: ${data.ball_position.at(-1)?.toFixed(4)}`;
+  } else {
+    out.textContent = JSON.stringify(data, null, 2);
+  }
+}
+
+async function getLogs() {
+  const data = await apiFetch('/logs?limit=10');
+  document.getElementById('logsOut').textContent = JSON.stringify(data, null, 2);
+}
+
+function exportLogs() {
+  window.open(API + '/logs/export?token=' + token());
+}
+
+async function getStats() {
+  const data = await apiFetch('/stats');
+  document.getElementById('statsOut').textContent = JSON.stringify(data, null, 2);
+}
+</script>
+</body>
+</html>
