@@ -1,0 +1,22 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
+    octave \
+    liboctave-dev \
+    netcat-openbsd \
+    socat \
+    python3 \
+    python3-pip \
+    && pip3 install flask \
+    && octave --no-gui --eval "pkg install -forge control" \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY octave_server.py /app/octave_server.py
+
+EXPOSE 5000
+
+CMD ["python3", "octave_server.py"]

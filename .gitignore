@@ -1,0 +1,10 @@
+.env
+*.env.local
+backend/logs/*.log
+backend/logs/*.csv
+docker/mysql_data/
+node_modules/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
