@@ -13,8 +13,8 @@ return [
         'host'     => getenv('DB_HOST')     ?: 'mysql',
         'port'     => getenv('DB_PORT')     ?: '3306',
         'name'     => getenv('DB_NAME')     ?: 'casapp',
-        'user'     => getenv('DB_USER')     ?: 'casuser',
-        'password' => getenv('DB_PASSWORD') ?: 'caspass',
+        'user'     => getenv('DB_USER')     ?: 'admin',
+        'password' => getenv('DB_PASSWORD') ?: 'admin',
         'charset'  => 'utf8mb4',
     ],
 
