@@ -13,7 +13,6 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-# Per-session variable store: session_id -> dict of variable assignments
 sessions = {}
 sessions_lock = threading.Lock()
 
@@ -21,7 +20,7 @@ SLOWDOWN_FACTOR = float(os.environ.get("OCTAVE_SLOWDOWN", "0"))  # seconds extra
 
 
 def run_octave(commands: list[str]) -> dict:
-    """Run a list of Octave commands and return stdout/stderr."""
+    #Run a list of Octave commands and return stdout/stderr
     script = "\n".join(commands) + "\n"
     try:
         result = subprocess.run(
@@ -50,10 +49,6 @@ def health():
 
 @app.route("/eval", methods=["POST"])
 def eval_command():
-    """
-    Body: { "session_id": "abc123", "command": "a = 1+1" }
-    Session variables are prepended automatically so state persists.
-    """
     data = request.get_json(force=True)
     session_id = data.get("session_id", "default")
     command = data.get("command", "").strip()
@@ -64,7 +59,6 @@ def eval_command():
     with sessions_lock:
         session_vars = sessions.get(session_id, {})
 
-    # Build preamble from saved variables
     preamble = []
     for var, val in session_vars.items():
         preamble.append(f"{var} = {val};")
@@ -72,8 +66,6 @@ def eval_command():
     commands = preamble + [command]
     out = run_octave(commands)
 
-    # Try to extract new/updated variable assignments from the command
-    # Simple heuristic: if line is "varname = expr", save it
     if out["returncode"] == 0:
         for line in command.split("\n"):
             line = line.strip().rstrip(";")
@@ -97,11 +89,8 @@ def eval_command():
 
 @app.route("/simulate/pendulum", methods=["POST"])
 def simulate_pendulum():
-    """
-    Run the inverted pendulum simulation.
-    Body: { "r": 0.2, "init_position": 0, "init_angle": 0, "t_end": 10 }
-    Returns time series data for animation.
-    """
+    #Run the inverted pendulum simulation.
+
     data = request.get_json(force=True)
     r = float(data.get("r", 0.2))
     init_pos = float(data.get("init_position", 0))
@@ -153,11 +142,8 @@ printf('T:%s\\nY1:%s\\nY2:%s\\nXLAST:%.6f,%.6f,%.6f,%.6f\\n', t_str, y1_str, y2_
 
 @app.route("/simulate/ball_beam", methods=["POST"])
 def simulate_ball_beam():
-    """
-    Run the ball-on-beam simulation.
-    Body: { "r": 0.25, "init_speed": 0, "init_accel": 0, "t_end": 5 }
-    Returns time series data for animation.
-    """
+    #Run the ball-on-beam simulation.
+
     data = request.get_json(force=True)
     r = float(data.get("r", 0.25))
     init_speed = float(data.get("init_speed", 0))

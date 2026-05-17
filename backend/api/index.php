@@ -20,11 +20,41 @@ require_once __DIR__ . '/controllers/StatsController.php';
 $cfg    = require __DIR__ . '/../config/config.php';
 $method = $_SERVER['REQUEST_METHOD'];
 $uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-
 $path   = preg_replace('#^/api#', '', $uri);
+
+//Public routes with no auth(P)
 
 if ($path === '/health' && $method === 'GET') {
     echo json_encode(['status' => 'ok', 'time' => date('c')]);
+    exit;
+}
+
+//P-OpenAPI YAML
+if ($path === '/docs' && $method === 'GET') {
+    $yaml = file_get_contents(__DIR__ . '/../docs/openapi.yaml');
+    header('Content-Type: application/yaml');
+    echo $yaml;
+    exit;
+}
+
+//P-OpenAPI PDF
+if ($path === '/docs/pdf' && $method === 'GET') {
+    $pdfPath  = __DIR__ . '/../docs/openapi_docs.pdf';
+    $genScript = __DIR__ . '/../docs/generate_pdf.py';
+
+    exec("python3 " . escapeshellarg($genScript) . " 2>&1", $out, $code);
+
+    if ($code !== 0 || !file_exists($pdfPath)) {
+        http_response_code(500);
+        header('Content-Type: application/json');
+        echo json_encode(['error' => 'PDF generation failed', 'details' => implode("\n", $out)]);
+        exit;
+    }
+
+    header('Content-Type: application/pdf');
+    header('Content-Disposition: inline; filename="api_documentation.pdf"');
+    header('Content-Length: ' . filesize($pdfPath));
+    readfile($pdfPath);
     exit;
 }
 
