@@ -1,7 +1,6 @@
 <?php
 declare(strict_types=1);
 
-header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Authorization, Content-Type');
@@ -25,15 +24,16 @@ $path   = preg_replace('#^/api#', '', $uri);
 //Public routes with no auth(P)
 
 if ($path === '/health' && $method === 'GET') {
+    header('Content-Type: application/json');
     echo json_encode(['status' => 'ok', 'time' => date('c')]);
     exit;
 }
 
 //P-OpenAPI YAML
 if ($path === '/docs' && $method === 'GET') {
-    $yaml = file_get_contents(__DIR__ . '/../docs/openapi.yaml');
-    header('Content-Type: application/yaml');
-    echo $yaml;
+    header('Content-Type: text/yaml');
+    header('Access-Control-Allow-Origin: *');
+    readfile(__DIR__ . '/../docs/openapi.yaml');
     exit;
 }
 
@@ -77,15 +77,9 @@ match (true) {
     //Stats
     $path === '/stats'              && $method === 'GET'  => $stats->index(),
 
-    //OpenAPI docs
-    $path === '/docs'               && $method === 'GET'  => (function () {
-        $yaml = file_get_contents(__DIR__ . '/../docs/openapi.yaml');
-        header('Content-Type: application/yaml');
-        echo $yaml;
-        exit;
-    })(),
 
     default => (function () {
+        header('Content-Type: application/json');
         http_response_code(404);
         echo json_encode(['error' => 'Route not found']);
     })(),

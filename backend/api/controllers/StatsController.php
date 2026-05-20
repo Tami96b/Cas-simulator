@@ -13,7 +13,7 @@ class StatsController
     public function record(string $animationType): void
     {
         $userToken = $this->getUserToken();
-        $ip        = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '';
+        $ip        = $this->getClientIp();
 
         $stmt = $this->db->prepare(
             'SELECT id FROM animation_stats
@@ -81,9 +81,37 @@ class StatsController
         return $_COOKIE['user_token'];
     }
 
+    private function getClientIp(): string
+    {
+        $forwardedFor = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '';
+
+        if ($forwardedFor !== '') {
+            $candidates = array_map('trim', explode(',', $forwardedFor));
+
+            foreach ($candidates as $candidate) {
+                if (filter_var($candidate, FILTER_VALIDATE_IP)) {
+                    return $candidate;
+                }
+            }
+        }
+
+        $realIp = $_SERVER['HTTP_X_REAL_IP'] ?? '';
+
+        if (filter_var($realIp, FILTER_VALIDATE_IP)) {
+            return $realIp;
+        }
+
+        $remoteAddr = $_SERVER['REMOTE_ADDR'] ?? '';
+
+        return filter_var($remoteAddr, FILTER_VALIDATE_IP) ? $remoteAddr : '';
+    }
+
     private function geoLookup(string $ip): array
     {
-        if (empty($ip) || $ip === '127.0.0.1' || str_starts_with($ip, '192.168.') || str_starts_with($ip, '10.')) {
+        if (
+            empty($ip) ||
+            !filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)
+        ) {
             return ['city' => 'localhost', 'country' => 'local'];
         }
         $raw = @file_get_contents("http://ip-api.com/json/{$ip}?fields=city,country", false,
