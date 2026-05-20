@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n-title="ballbeam.title">Ball Beam</title>
+
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+    >
+
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+
+        <a class="navbar-brand" href="../index.html">
+            CAS Simulator
+        </a>
+
+        <button
+                class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarNav"
+        >
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+
+            <ul class="navbar-nav ms-auto">
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../index.html" data-i18n="nav.home">Home</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="console.html" data-i18n="nav.console">CAS Console</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="pendulum.html" data-i18n="nav.pendulum">Pendulum</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link active" href="ballbeam.html" data-i18n="nav.ballbeam">Ball Beam</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="stats.html" data-i18n="nav.stats">Statistics</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="logs.html" data-i18n="nav.logs">Logs</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="docs.html" data-i18n="nav.docs">API Docs</a>
+                </li>
+
+                <li class="nav-item">
+                    <div class="language-switcher">
+                        <button class="language-button" type="button" data-lang="sk" data-i18n="lang.sk">SK</button>
+                        <button class="language-button" type="button" data-lang="en" data-i18n="lang.en">EN</button>
+                    </div>
+                </li>
+
+            </ul>
+
+        </div>
+
+    </div>
+</nav>
+
+<div class="container py-5">
+
+    <div class="hero-card">
+
+        <div class="hero-top-line"></div>
+
+        <div class="card-body p-5">
+
+            <h1 class="main-title" data-i18n="ballbeam.title">
+                Ball Beam
+            </h1>
+
+            <p class="main-subtitle" data-i18n="ballbeam.subtitle">
+                Simulation of a ball moving on a controlled beam.
+                Octave backend calculates the numerical response,
+                while the frontend renders synchronized graph and animation.
+            </p>
+
+            <div class="row mt-5">
+
+                <div class="col-lg-4 mb-4">
+
+                    <div class="simulation-panel">
+
+                        <h4 class="mb-4" data-i18n="common.simulationParameters">
+                            Simulation Parameters
+                        </h4>
+
+                        <div class="mb-3">
+                            <label class="form-label" data-i18n="common.targetPosition">Target position r</label>
+                            <input
+                                    id="ballBeamTarget"
+                                    type="number"
+                                    step="0.05"
+                                    class="form-control"
+                                    value="0.25"
+                            >
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" data-i18n="ballbeam.initialVelocity">Initial velocity</label>
+                            <input
+                                    id="ballBeamInitialVelocity"
+                                    type="number"
+                                    step="0.1"
+                                    class="form-control"
+                                    value="0"
+                            >
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label" data-i18n="ballbeam.initialAcceleration">Initial acceleration</label>
+                            <input
+                                    id="ballBeamInitialAcceleration"
+                                    type="number"
+                                    step="0.1"
+                                    class="form-control"
+                                    value="0"
+                            >
+                        </div>
+
+                        <button
+                                id="runBallBeamBtn"
+                                class="btn btn-primary w-100"
+                                data-i18n="ballbeam.run"
+                        >
+                            Run simulation
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div class="col-lg-8 mb-4">
+
+                    <div class="simulation-panel">
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+
+                            <h4 class="mb-0" data-i18n="common.animation">
+                                Animation
+                            </h4>
+
+                            <span
+                                    id="ballBeamStatus"
+                                    class="simulation-status"
+                            >
+                                <span data-i18n="common.waiting">Waiting</span>
+                            </span>
+
+                        </div>
+
+                        <div class="animation-wrapper mb-5">
+                            <canvas
+                                    id="ballBeamAnimation"
+                                    width="900"
+                                    height="360"
+                            ></canvas>
+                        </div>
+
+                        <h4 class="mb-3 mt-5" data-i18n="common.graph">
+                            Graph
+                        </h4>
+
+                        <div class="chart-wrapper">
+                            <canvas id="ballBeamChart"></canvas>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="simulation-panel mt-4">
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+
+                    <h4 class="mb-0" data-i18n="common.rawOutput">
+                        Raw API Output
+                    </h4>
+
+                    <button
+                            class="btn btn-outline-secondary btn-sm"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#ballBeamRawOutputCollapse"
+                            aria-expanded="false"
+                            aria-controls="ballBeamRawOutputCollapse"
+                            data-i18n="common.showHideRaw"
+                    >
+                        Show / hide raw output
+                    </button>
+
+                </div>
+
+                <div
+                        class="collapse"
+                        id="ballBeamRawOutputCollapse"
+                >
+                    <div
+                            id="ballBeamOutput"
+                            class="console-box"
+                    >
+                        <span data-i18n="common.waitingSimulation">Waiting for simulation...</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script src="../js/loading.js"></script>
+<script src="../js/translations.js"></script>
+<script src="../js/i18n.js"></script>
+<script src="../js/theme.js"></script>
+<script src="../js/toast.js"></script>
+<script src="../js/ballbeam.js"></script>
+
+</body>
+</html>

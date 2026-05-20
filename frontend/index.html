@@ -1,141 +1,450 @@
 <!DOCTYPE html>
-<html lang="sk">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CAS App – API test</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: system-ui, sans-serif; background: #0f1117; color: #e2e8f0; padding: 2rem; }
-  h1 { color: #7dd3fc; margin-bottom: 1.5rem; }
-  .card { background: #1e2130; border: 1px solid #2d3348; border-radius: 10px; padding: 1.25rem; margin-bottom: 1.25rem; }
-  label { display: block; font-size: .85rem; color: #94a3b8; margin-bottom: .4rem; }
-  input, textarea, select { width: 100%; background: #111827; border: 1px solid #374151; border-radius: 6px;
-    color: #e2e8f0; padding: .5rem .75rem; font-family: monospace; font-size: .9rem; }
-  textarea { height: 90px; resize: vertical; }
-  button { background: #3b82f6; color: #fff; border: none; border-radius: 6px;
-    padding: .55rem 1.2rem; cursor: pointer; font-size: .9rem; margin-top: .75rem; }
-  button:hover { background: #2563eb; }
-  pre { background: #111827; border-radius: 6px; padding: .75rem; font-size: .8rem;
-    overflow-x: auto; max-height: 260px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; }
-  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-  @media (max-width: 600px) { .row { grid-template-columns: 1fr; } }
-</style>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title data-i18n-title="home.title">CAS Simulator</title>
+
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+    >
+
+    <link rel="stylesheet" href="css/style.css">
+
 </head>
-<body>
-<h1>CAS App — API testovací panel</h1>
 
-<div class="card">
-  <label>API Token</label>
-  <input id="token" type="text" value="SECRET">
-</div>
+<body class="home-body">
 
-<!-- Eval -->
-<div class="card">
-  <label>Octave príkaz (/api/eval)</label>
-  <textarea id="evalCmd">a = 1 + 1
-a + 2</textarea>
-  <button onclick="runEval()">Spustiť</button>
-  <pre id="evalOut">—</pre>
-</div>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
 
-<!-- Pendulum -->
-<div class="card">
-  <label>Invertované kyvadlo (/api/simulate/pendulum)</label>
-  <div class="row">
-    <div><label>r (cieľová pozícia)</label><input id="pR" type="number" value="0.2" step="0.05"></div>
-    <div><label>t_end (s)</label><input id="pT" type="number" value="10" step="1"></div>
-  </div>
-  <button onclick="runPendulum()">Simulovať</button>
-  <pre id="pendulumOut">—</pre>
-</div>
+    <div class="container-fluid">
 
-<!-- Ball-beam -->
-<div class="card">
-  <label>Gulička na tyči (/api/simulate/ball-beam)</label>
-  <div class="row">
-    <div><label>r (cieľová pozícia)</label><input id="bR" type="number" value="0.25" step="0.05"></div>
-    <div><label>t_end (s)</label><input id="bT" type="number" value="5" step="1"></div>
-  </div>
-  <button onclick="runBallBeam()">Simulovať</button>
-  <pre id="ballBeamOut">—</pre>
-</div>
+        <a
+                class="navbar-brand"
+                href="index.html"
+        >
+            CAS Simulator
+        </a>
 
-<!-- Logs -->
-<div class="card">
-  <button onclick="getLogs()">Zobraziť logy</button>
-  <button onclick="exportLogs()">Exportovať CSV</button>
-  <pre id="logsOut">—</pre>
-</div>
+        <button
+                class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarNav"
+        >
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-<!-- Stats -->
-<div class="card">
-  <button onclick="getStats()">Zobraziť štatistiky</button>
-  <pre id="statsOut">—</pre>
-</div>
+        <div
+                class="collapse navbar-collapse"
+                id="navbarNav"
+        >
 
-<script>
-const API = '/api';
-const token = () => document.getElementById('token').value.trim();
+            <ul class="navbar-nav ms-auto">
 
-async function apiFetch(path, options = {}) {
-  const res = await fetch(API + path, {
-    ...options,
-    headers: { 'Authorization': 'Bearer ' + token(), 'Content-Type': 'application/json', ...(options.headers || {}) },
-  });
-  if (res.headers.get('content-type')?.includes('json')) return res.json();
-  return res.text();
-}
+                <li class="nav-item">
+                    <a
+                            class="nav-link active"
+                            href="index.html"
+                            data-i18n="nav.home"
+                    >
+                        Home
+                    </a>
+                </li>
 
-async function runEval() {
-  const out = document.getElementById('evalOut');
-  out.textContent = 'Načítavam…';
-  const cmd = document.getElementById('evalCmd').value;
-  const data = await apiFetch('/eval', { method: 'POST', body: JSON.stringify({ command: cmd, session_id: 'test' }) });
-  out.textContent = JSON.stringify(data, null, 2);
-}
+                <li class="nav-item">
+                    <a
+                            class="nav-link"
+                            href="pages/console.html"
+                            data-i18n="nav.console"
+                    >
+                        CAS Console
+                    </a>
+                </li>
 
-async function runPendulum() {
-  const out = document.getElementById('pendulumOut');
-  out.textContent = 'Simulujem…';
-  const data = await apiFetch('/simulate/pendulum', {
-    method: 'POST',
-    body: JSON.stringify({ r: +document.getElementById('pR').value, t_end: +document.getElementById('pT').value })
-  });
-  if (data.t) {
-    out.textContent = `OK – ${data.t.length} časových krokov\nPozícia[0]: ${data.position[0]?.toFixed(4)}\nPozícia[-1]: ${data.position.at(-1)?.toFixed(4)}`;
-  } else {
-    out.textContent = JSON.stringify(data, null, 2);
-  }
-}
+                <li class="nav-item">
+                    <a
+                            class="nav-link"
+                            href="pages/pendulum.html"
+                            data-i18n="nav.pendulum"
+                    >
+                        Pendulum
+                    </a>
+                </li>
 
-async function runBallBeam() {
-  const out = document.getElementById('ballBeamOut');
-  out.textContent = 'Simulujem…';
-  const data = await apiFetch('/simulate/ball-beam', {
-    method: 'POST',
-    body: JSON.stringify({ r: +document.getElementById('bR').value, t_end: +document.getElementById('bT').value })
-  });
-  if (data.t) {
-    out.textContent = `OK – ${data.t.length} časových krokov\nPozícia[0]: ${data.ball_position[0]?.toFixed(4)}\nPozícia[-1]: ${data.ball_position.at(-1)?.toFixed(4)}`;
-  } else {
-    out.textContent = JSON.stringify(data, null, 2);
-  }
-}
+                <li class="nav-item">
+                    <a
+                            class="nav-link"
+                            href="pages/ballbeam.html"
+                            data-i18n="nav.ballbeam"
+                    >
+                        Ball Beam
+                    </a>
+                </li>
 
-async function getLogs() {
-  const data = await apiFetch('/logs?limit=10');
-  document.getElementById('logsOut').textContent = JSON.stringify(data, null, 2);
-}
+                <li class="nav-item">
+                    <a
+                            class="nav-link"
+                            href="pages/stats.html"
+                            data-i18n="nav.stats"
+                    >
+                        Statistics
+                    </a>
+                </li>
 
-function exportLogs() {
-  window.open(API + '/logs/export?token=' + token());
-}
+                <li class="nav-item">
+                    <a
+                            class="nav-link"
+                            href="pages/logs.html"
+                            data-i18n="nav.logs"
+                    >
+                        Logs
+                    </a>
+                </li>
 
-async function getStats() {
-  const data = await apiFetch('/stats');
-  document.getElementById('statsOut').textContent = JSON.stringify(data, null, 2);
-}
-</script>
+                <li class="nav-item">
+                    <a
+                            class="nav-link"
+                            href="pages/docs.html"
+                            data-i18n="nav.docs"
+                    >
+                        API Docs
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <div class="language-switcher">
+                        <button class="language-button" type="button" data-lang="sk" data-i18n="lang.sk">SK</button>
+                        <button class="language-button" type="button" data-lang="en" data-i18n="lang.en">EN</button>
+                    </div>
+                </li>
+
+            </ul>
+
+        </div>
+
+    </div>
+
+</nav>
+
+<section class="hero-section">
+
+    <div class="hero-background-glow"></div>
+
+    <div class="container">
+
+        <div class="row align-items-center min-vh-75">
+
+            <div class="col-lg-7">
+
+                <div class="hero-content">
+
+                    <div class="hero-badge" data-i18n="home.heroBadge">
+                        Computer Aided Systems Platform
+                    </div>
+
+                    <h1 class="hero-title">
+                        <span data-i18n="home.heroTitle">Dynamic Simulations</span>
+                        <span
+                                class="hero-gradient-text"
+                                data-i18n="home.heroTitleAccent"
+                        >
+                            Powered by Octave
+                        </span>
+                    </h1>
+
+                    <p class="hero-description" data-i18n="home.heroDescription">
+
+                        Modern web-based simulation platform integrating Octave numerical computation, REST API architecture, dynamic visualization, logging, analytics, and OpenAPI documentation.
+
+                    </p>
+
+                    <div class="hero-actions">
+
+                        <a
+                                href="pages/console.html"
+                                class="btn hero-btn-primary"
+                                data-i18n="home.openConsole"
+                        >
+                            Open Console
+                        </a>
+
+                        <a
+                                href="pages/docs.html"
+                                class="btn hero-btn-secondary"
+                                data-i18n="home.apiDocumentation"
+                        >
+                            API Documentation
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-5">
+
+                <div class="hero-visual">
+
+                    <div class="floating-card floating-card-1">
+
+                        <div class="floating-card-title" data-i18n="nav.pendulum">
+                            Pendulum
+                        </div>
+
+                        <canvas
+                                id="homePendulumPreview"
+                                class="home-preview-canvas"
+                                width="320"
+                                height="180"
+                        ></canvas>
+
+                    </div>
+
+                    <div class="floating-card floating-card-2">
+
+                        <div class="floating-card-title" data-i18n="nav.ballbeam">
+                            Ball Beam
+                        </div>
+
+                        <canvas
+                                id="homeBallBeamPreview"
+                                class="home-preview-canvas"
+                                width="320"
+                                height="180"
+                        ></canvas>
+
+                    </div>
+
+                    <div class="floating-card floating-card-3">
+
+                        <div class="floating-card-title" data-i18n="home.apiAnalytics">
+                            API Analytics
+                        </div>
+
+                        <div class="mini-stats">
+
+                            <div class="mini-stat">
+                                <span data-i18n="nav.logs">Logs</span>
+                                <strong>124</strong>
+                            </div>
+
+                            <div class="mini-stat">
+                                <span data-i18n="home.runs">Runs</span>
+                                <strong>63</strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<section class="features-section">
+
+    <div class="container">
+
+        <div class="section-header">
+
+            <div class="section-badge" data-i18n="home.featuresBadge">
+                Features
+            </div>
+
+            <h2 class="section-title" data-i18n="home.featuresTitle">
+                Enterprise-style architecture
+            </h2>
+
+            <p class="section-description" data-i18n="home.featuresDescription">
+
+                Backend APIs, dynamic simulations, logging, analytics and OpenAPI integration combined into a unified modern platform.
+
+            </p>
+
+        </div>
+
+        <div class="row">
+
+            <div class="col-lg-4 mb-4">
+
+                <div class="feature-card">
+
+                    <div class="feature-icon">
+                        ⚙
+                    </div>
+
+                    <h3 class="feature-title" data-i18n="home.octaveIntegrationTitle">
+                        Octave Integration
+                    </h3>
+
+                    <p class="feature-description" data-i18n="home.octaveIntegrationText">
+
+                        Execute mathematical calculations and dynamic system simulations through REST APIs.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-4 mb-4">
+
+                <div class="feature-card">
+
+                    <div class="feature-icon">
+                        📊
+                    </div>
+
+                    <h3 class="feature-title" data-i18n="home.visualizationTitle">
+                        Visualization
+                    </h3>
+
+                    <p class="feature-description" data-i18n="home.visualizationText">
+
+                        Real-time graphs and animated simulation rendering powered by Chart.js and Canvas.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-4 mb-4">
+
+                <div class="feature-card">
+
+                    <div class="feature-icon">
+                        📄
+                    </div>
+
+                    <h3 class="feature-title" data-i18n="home.openapiTitle">
+                        OpenAPI Docs
+                    </h3>
+
+                    <p class="feature-description" data-i18n="home.openapiText">
+
+                        Interactive Swagger documentation with downloadable PDF specification.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<section class="architecture-section">
+
+    <div class="container">
+
+        <div class="architecture-card">
+
+            <div class="row align-items-center">
+
+                <div class="col-lg-6">
+
+                    <div class="section-badge" data-i18n="home.architectureBadge">
+                        Architecture
+                    </div>
+
+                    <h2 class="architecture-title" data-i18n="home.architectureTitle">
+                        Modern Dockerized Backend
+                    </h2>
+
+                    <p class="architecture-description" data-i18n="home.architectureDescription">
+
+                        The platform uses a modular architecture with PHP REST APIs, Octave execution container, MySQL persistence layer, Swagger/OpenAPI documentation, and interactive Bootstrap frontend.
+
+                    </p>
+
+                </div>
+
+                <div class="col-lg-6">
+
+                    <div class="architecture-diagram">
+
+                        <div class="arch-node">
+                            Frontend
+                        </div>
+
+                        <div class="arch-arrow">
+                            ↓
+                        </div>
+
+                        <div class="arch-node">
+                            PHP API
+                        </div>
+
+                        <div class="arch-arrow">
+                            ↓
+                        </div>
+
+                        <div class="arch-node">
+                            Octave Engine
+                        </div>
+
+                        <div class="arch-arrow">
+                            ↓
+                        </div>
+
+                        <div class="arch-node">
+                            MySQL Logs
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<footer class="footer-section">
+
+    <div class="container">
+
+        <div class="footer-content">
+
+            <div class="footer-title">
+                CAS Simulator WEBTE2 Záverečné zadanie
+            </div>
+
+            <div class="footer-authors">
+                Tamás Bagin, Kinga Lángyiová
+            </div>
+
+        </div>
+
+    </div>
+
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/loading.js"></script>
+<script src="js/translations.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/toast.js"></script>
+<script src="js/home.js"></script>
+
 </body>
 </html>

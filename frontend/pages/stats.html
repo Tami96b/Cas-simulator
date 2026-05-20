@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n-title="stats.title">Statistics</title>
+
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+    >
+
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+
+        <a class="navbar-brand" href="../index.html">
+            CAS Simulator
+        </a>
+
+        <button
+                class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarNav"
+        >
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+
+            <ul class="navbar-nav ms-auto">
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../index.html" data-i18n="nav.home">Home</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="console.html" data-i18n="nav.console">CAS Console</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="pendulum.html" data-i18n="nav.pendulum">Pendulum</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="ballbeam.html" data-i18n="nav.ballbeam">Ball Beam</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link active" href="stats.html" data-i18n="nav.stats">Statistics</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="logs.html" data-i18n="nav.logs">Logs</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="docs.html" data-i18n="nav.docs">API Docs</a>
+                </li>
+
+                <li class="nav-item">
+                    <div class="language-switcher">
+                        <button class="language-button" type="button" data-lang="sk" data-i18n="lang.sk">SK</button>
+                        <button class="language-button" type="button" data-lang="en" data-i18n="lang.en">EN</button>
+                    </div>
+                </li>
+
+            </ul>
+
+        </div>
+
+    </div>
+</nav>
+
+<div class="container py-5">
+
+    <div class="hero-card">
+
+        <div class="hero-top-line"></div>
+
+        <div class="card-body p-5">
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+
+                <div>
+                    <h1 class="main-title mb-2" data-i18n="stats.title">
+                        Statistics
+                    </h1>
+
+                    <p class="main-subtitle mb-0" data-i18n="stats.subtitle">
+                        Usage overview of dynamic simulations executed by users.
+                    </p>
+                </div>
+
+                <button
+                        id="refreshStatsBtn"
+                        class="btn btn-primary"
+                        type="button"
+                        data-i18n="stats.refresh"
+                >
+                    Refresh statistics
+                </button>
+
+            </div>
+
+            <div class="row mb-4">
+
+                <div class="col-md-6 mb-4">
+
+                    <div class="stat-card">
+
+                        <div class="stat-label" data-i18n="pendulum.title">
+                            Inverted Pendulum
+                        </div>
+
+                        <div
+                                id="pendulumCount"
+                                class="stat-value"
+                        >
+                            -
+                        </div>
+
+                        <div class="stat-description" data-i18n="stats.totalRuns">
+                            Total counted simulation runs
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-6 mb-4">
+
+                    <div class="stat-card">
+
+                        <div class="stat-label" data-i18n="ballbeam.title">
+                            Ball Beam
+                        </div>
+
+                        <div
+                                id="ballBeamCount"
+                                class="stat-value"
+                        >
+                            -
+                        </div>
+
+                        <div class="stat-description" data-i18n="stats.totalRuns">
+                            Total counted simulation runs
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="simulation-panel mb-4">
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+
+                    <h4 class="mb-0" data-i18n="stats.usageChart">
+                        Usage chart
+                    </h4>
+
+                    <span
+                            id="statsStatus"
+                            class="simulation-status"
+                    >
+                        <span data-i18n="common.waiting">Waiting</span>
+                    </span>
+
+                </div>
+
+                <div class="chart-wrapper chart-wrapper-small">
+                    <canvas id="statsChart"></canvas>
+                </div>
+
+            </div>
+
+            <div class="simulation-panel">
+
+                <h4 class="mb-3" data-i18n="stats.detailedUsage">
+                    Detailed usage
+                </h4>
+
+                <div
+                        id="statsMessage"
+                        class="mb-3"
+                ></div>
+
+                <div class="table-responsive">
+
+                    <table class="table align-middle custom-table">
+
+                        <thead>
+                        <tr>
+                            <th data-i18n="stats.dateTime">Date / Time</th>
+                            <th data-i18n="stats.animation">Animation</th>
+                            <th data-i18n="stats.city">City</th>
+                            <th data-i18n="stats.country">Country</th>
+                        </tr>
+                        </thead>
+
+                        <tbody id="statsTableBody">
+
+                        <tr>
+                            <td colspan="4" class="text-muted" data-i18n="stats.emptyInitial">
+                                No statistics loaded yet.
+                            </td>
+                        </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="../js/loading.js"></script>
+<script src="../js/translations.js"></script>
+<script src="../js/i18n.js"></script>
+<script src="../js/theme.js"></script>
+<script src="../js/toast.js"></script>
+<script src="../js/stats.js"></script>
+
+</body>
+</html>

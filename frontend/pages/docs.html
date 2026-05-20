@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n-title="docs.title">API Docs</title>
+
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+    >
+    <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css"
+    />
+
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+
+        <a class="navbar-brand" href="../index.html">
+            CAS Simulator
+        </a>
+
+        <button
+                class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarNav"
+        >
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+
+            <ul class="navbar-nav ms-auto">
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../index.html" data-i18n="nav.home">Home</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="console.html" data-i18n="nav.console">CAS Console</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="pendulum.html" data-i18n="nav.pendulum">Pendulum</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="ballbeam.html" data-i18n="nav.ballbeam">Ball Beam</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="stats.html" data-i18n="nav.stats">Statistics</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="logs.html" data-i18n="nav.logs">Logs</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link active" href="docs.html" data-i18n="nav.docs">API Docs</a>
+                </li>
+
+                <li class="nav-item">
+                    <div class="language-switcher">
+                        <button class="language-button" type="button" data-lang="sk" data-i18n="lang.sk">SK</button>
+                        <button class="language-button" type="button" data-lang="en" data-i18n="lang.en">EN</button>
+                    </div>
+                </li>
+
+            </ul>
+
+        </div>
+
+    </div>
+</nav>
+
+<div class="container py-5">
+
+    <div class="hero-card">
+
+        <div class="hero-top-line"></div>
+
+        <div class="card-body p-5">
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+
+                <div>
+                    <h1 class="main-title mb-2" data-i18n="docs.title">
+                        API Documentation
+                    </h1>
+
+                    <p class="main-subtitle mb-0" data-i18n="docs.subtitle">
+                        OpenAPI documentation of the CAS Simulator backend.
+                    </p>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2">
+
+                    <a
+                            class="btn btn-primary"
+                            href="/api/docs"
+                            target="_blank"
+                            data-i18n="docs.open"
+                    >
+                        Open API docs
+                    </a>
+
+                    <a
+                            class="btn btn-outline-secondary"
+                            href="/api/docs/pdf"
+                            target="_blank"
+                            data-i18n="docs.downloadPdf"
+                    >
+                        Download PDF
+                    </a>
+
+                </div>
+
+            </div>
+
+            <div class="row mb-4">
+
+                <div class="col-md-4 mb-4">
+
+                    <div class="stat-card">
+
+                        <div class="stat-label" data-i18n="docs.authTitle">
+                            Authentication
+                        </div>
+
+                        <div class="docs-icon">
+                            🔐
+                        </div>
+
+                        <div class="stat-description" data-i18n="docs.authText">
+                            API access is protected using Bearer token authentication.
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-4 mb-4">
+
+                    <div class="stat-card">
+
+                        <div class="stat-label" data-i18n="docs.simulationsTitle">
+                            Simulations
+                        </div>
+
+                        <div class="docs-icon">
+                            ⚙
+                        </div>
+
+                        <div class="stat-description" data-i18n="docs.simulationsText">
+                            Backend exposes endpoints for pendulum and ball-beam simulations.
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-4 mb-4">
+
+                    <div class="stat-card">
+
+                        <div class="stat-label" data-i18n="docs.exportTitle">
+                            Export
+                        </div>
+
+                        <div class="docs-icon">
+                            📄
+                        </div>
+
+                        <div class="stat-description" data-i18n="docs.exportText">
+                            Logs and documentation can be exported for submission.
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="simulation-panel">
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+
+                    <h4 class="mb-0" data-i18n="docs.embedded">
+                        Embedded OpenAPI
+                    </h4>
+
+                    <span class="simulation-status success" data-i18n="common.available">
+                        Available
+                    </span>
+
+                </div>
+
+                <div class="docs-frame-wrapper">
+
+                    <div id="swagger-ui"></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="../js/loading.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+<script src="../js/translations.js"></script>
+<script src="../js/i18n.js"></script>
+<script src="../js/theme.js"></script>
+<script src="../js/toast.js"></script>
+<script src="../js/docs.js"></script>
+
+</body>
+</html>
